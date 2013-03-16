@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+prefix="$HOME/local"
+
+for i in "$prefix"/*/bin/addr2line; do
+  if [ -x "$i" ]; then
+    path="$i"
+    version=`"$i" --version | head --lines=1 | grep -Eo '[[:digit:]]+(\.[[:digit:]]+){0,2}$'`
+    if [ -n "$newest_version" ]; then
+      version=`echo "$version
+$newest_version" | sort --version-sort | tail --lines=1`
+      if [ "$version" != "$newest_version" ]; then
+        newest_path="$path"
+        newest_version="$version"
+      fi
+    else
+      newest_path="$path"
+      newest_version="$version"
+    fi
+  fi
+done
+
+if [ -n "$newest_path" ]; then
+  "$newest_path" "$@"
+else
+  /usr/bin/addr2line "$@"
+fi
